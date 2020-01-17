@@ -1,0 +1,23 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 16MB
+      max-request-size: 16MB
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+
+logging:
+  file:
+    name: auc.log
+    path: ./logs/
+    archive: ./logs/archive/
+
+
+  level:
+    web: DEBUG
