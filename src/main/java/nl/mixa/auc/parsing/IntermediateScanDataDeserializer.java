@@ -31,22 +31,22 @@ public class IntermediateScanDataDeserializer {
     private ObjectMapper objectMapper;
 
 
-    public List<ItemScanData> deserializeString(List<String> data, String realm, AucScanData aucScanData) {
-        return data.stream().flatMap(it -> deserializeString(it, realm, aucScanData).stream()).collect(Collectors.toList());
+    public List<ItemScanData> deserializeString(List<String> data, String realm, String uniqueScanId) {
+        return data.stream().flatMap(it -> deserializeString(it, realm, uniqueScanId).stream()).collect(Collectors.toList());
     }
 
-    public List<ItemScanData> deserializeString(String data, String realm, AucScanData aucScanData) {
+    public List<ItemScanData> deserializeString(String data, String realm, String uniqueScanId) {
         String cleanedData = cleanInputdata(data);
         String jsonArray = "[" + cleanedData + "]";
         try {
             List<List<Object>> list = objectMapper.readValue(jsonArray, objectMapper.getTypeFactory().constructCollectionLikeType(ArrayList.class, ArrayList.class));
-            return list.stream().map(scanData -> convertObjectListIntoScanData(aucScanData, scanData, realm)).collect(Collectors.toList());
+            return list.stream().map(scanData -> convertObjectListIntoScanData(uniqueScanId, scanData, realm)).collect(Collectors.toList());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private ItemScanData convertObjectListIntoScanData(AucScanData aucScanData, List<Object> scanData, String realm) {
+    private ItemScanData convertObjectListIntoScanData(String uniqueScanId, List<Object> scanData, String realm) {
         if (scanData.size() != ROPE_MAPPING.size()) {
             logger.warn("ILLEGAL_ROPE: " + String.join(", " + scanData));
             throw new IllegalArgumentException("ILLEGAL_ROPE_DATA_SIZE_" + scanData.size());
@@ -63,16 +63,8 @@ public class IntermediateScanDataDeserializer {
                 .stacks(intermediateScanItem.getStackSize())
                 .realm(realm)
                 .scanDate(intermediateScanItem.getSeenDate())
-                .uniqueScanId(getUniqueId(aucScanData))
+                .uniqueScanId(uniqueScanId)
                 .build();
-    }
-
-    private String getUniqueId(AucScanData aucScanData) {
-        List<AucScanStats> stats = aucScanData.getScans().values().stream().map(AucScans::getScanStats).collect(Collectors.toList());
-        return stats.stream().map(AucScanStats::getSingleScan).flatMap(it -> it.values().stream())
-                .mapToLong(AucSingleScanStats::hashCode)
-                .mapToObj(Long::toString)
-                .collect(Collectors.joining("-"));
     }
 
     private String cleanInputdata(String data) {

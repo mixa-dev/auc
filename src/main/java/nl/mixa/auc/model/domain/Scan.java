@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -30,4 +29,13 @@ public class Scan {
     @CreationTimestamp
     private Instant created;
 
+    @Override
+    public String toString() {
+        return "Scan{" +
+                "id=" + id +
+                ", scanDate=" + scanDate +
+                ", updated=" + updated +
+                ", created=" + created +
+                '}';
+    }
 }
